@@ -36,7 +36,7 @@
 	mob_size = MOB_SIZE_SMALL
 	density = FALSE
 	see_in_dark = FAMILIAR_SEE_IN_DARK
-	lighting_alpha = LIGHTING_PLANE_ALPHA_INVISIBLE
+	lighting_alpha = LIGHTING_PLANE_ALPHA_MOSTLY_INVISIBLE
 	mob_biotypes = MOB_ORGANIC|MOB_BEAST
 	minbodytemp = FAMILIAR_MIN_BODYTEMP
 	maxbodytemp = FAMILIAR_MAX_BODYTEMP
@@ -113,6 +113,7 @@
 	TryAddFlight()
 	icon_dead = icon_living // to prevent sprite updating weirdness with vestige revival
 	grant_languages() // we're pAI equivalent extraplanar beings and this avoids weird edge cases like infernals not speaking infernal
+	verbs += /mob/living/simple_animal/pet/familiar/proc/Toggledarkvision
 
 // minor bit of organization to not clutter Initialize since uh,
 // there are a lot of languages we do not want to give like (checks) EAL holy shit why is that still in our code???
@@ -156,6 +157,15 @@
 	if(movement_type & (FLYING | FLOATING))
 		add_verb(src, list(/mob/living/simple_animal/proc/fly_up,
 		/mob/living/simple_animal/proc/fly_down))
+
+/mob/living/simple_animal/pet/familiar/proc/Toggledarkvision()
+	set category = "IC"
+	set name = "Toggle Darkvision"
+
+	if(lighting_alpha == LIGHTING_PLANE_ALPHA_MOSTLY_INVISIBLE)
+		lighting_alpha = LIGHTING_PLANE_ALPHA_VISIBLE
+	else
+		lighting_alpha = LIGHTING_PLANE_ALPHA_MOSTLY_INVISIBLE
 
 // they can wear pouches and amulets around their neck, for sovl
 /mob/living/simple_animal/pet/familiar/can_equip(obj/item/I, slot, disable_warning, bypass_equip_delay_self)
@@ -251,7 +261,9 @@
 	var/brewing = 0
 	var/should_brew = FALSE
 	pass_flags = PASSTABLE | PASSMOB
-	inherent_spell = list(/datum/action/cooldown/spell/projectile/lesser_fetch/fae)
+	inherent_spell = list(
+		/datum/action/cooldown/spell/projectile/lesser_fetch/fae,
+		/datum/action/cooldown/spell/fae_empty)
 	movement_type = FLYING
 	t1_spell = /obj/effect/proc_holder/spell/invoked/reagent_bite
 	t2_spell = /datum/action/cooldown/spell/fae_brew
@@ -269,6 +281,8 @@
 	ADD_TRAIT(src, TRAIT_CICERONE, TRAIT_GENERIC) // alchemy familiar
 	ADD_TRAIT(src, TRAIT_KNEESTINGER_IMMUNITY, TRAIT_GENERIC) // they're literally nature spirits
 	ADD_TRAIT(src, TRAIT_KEENEARS, TRAIT_GENERIC) // to fit with their recon focus
+	ADD_TRAIT(src, TRAIT_ALCHEMY_EXPERT, TRAIT_GENERIC) //allows Fae to get double harvests from plants
+	src.adjust_skillrank_up_to(/datum/skill/craft/alchemy, SKILL_EXP_JOURNEYMAN)
 
 /mob/living/simple_animal/pet/familiar/fae/is_aligned_leyline(obj/structure/leyline/ley)
 	return istype(ley, /obj/structure/leyline/normal/grove)
@@ -341,7 +355,7 @@
 		return TRUE
 	. = ..()
 
-/mob/living/simple_animal/pet/familiar/fae/attack_hand(mob/living/M)
+/mob/living/simple_animal/pet/familiar/fae/attack_right(mob/living/M)
 	if(ingredients.len)
 		var/obj/item/I = ingredients[ingredients.len]
 		ingredients -= I

@@ -163,6 +163,27 @@
 	user.should_brew = !user.should_brew
 	return TRUE
 
+/datum/action/cooldown/spell/fae_empty
+	name = "Empty Stomach"
+	desc = "Spill out your stomach onto the ground, freeing it for other reagents"
+	
+	click_to_activate = TRUE
+	self_cast_possible = TRUE
+	charge_required = FALSE
+	cooldown_time = 1 SECONDS
+
+	primary_resource_cost = SPELL_COST_NONE
+	spell_requirements = NONE
+	spell_impact_intensity = SPELL_IMPACT_NONE
+
+/datum/action/cooldown/spell/fae_empty/cast(mob/living/simple_animal/pet/familiar/fae/user)
+	. = ..()
+	if(!user.reagents.total_volume == 0)
+		user.reagents.remove_all(90)
+	else
+		to_chat(user, span_notice("My stomach is already empty."))
+		return FALSE
+
 /datum/action/cooldown/spell/projectile/lesser_fetch/fae
 	name = "Grasp of Nature"
 	desc = "Shoot out a grasping vine that draws in a freestanding item towards the caster. Doesn't work on living targets."
