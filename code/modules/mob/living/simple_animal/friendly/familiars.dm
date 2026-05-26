@@ -58,10 +58,10 @@
 	var/tier = 0 // increments once per dae survived; gates the stronger abilities
 	var/mob/living/carbon/familiar_summoner = null
 	var/inherent_spell = null
-	var/t1_spell = null
+	var/t1_spell = list()
 	var/tutorial_message = null
 	var/tierup_messages = list()
-	var/t2_spell = null
+	var/t2_spell = list()
 	var/summoning_emote = null
 	var/list/valid_healing_items = list() // what planar materials can heal you?
 	var/planar_origin = "void" // what plane are we from? avoids a bunch of istype checks
@@ -183,13 +183,17 @@
 
 /mob/living/simple_animal/pet/familiar/proc/grant_tier_abilities(tier)
 	if(tier==1 && t1_spell)
-		var/spell_instance = new t1_spell
-		if(spell_instance && src.mind)
-			src.mind.AddSpell(spell_instance)
+		for(var/spell_path in t1_spell)
+			if(ispath(spell_path))
+				var/obj/effect/proc_holder/spell/spell_instance = new spell_path
+				if(spell_instance && src.mind)
+					src.mind.AddSpell(spell_instance)
 	if(tier==2 && t2_spell)
-		var/spell_instance = new t2_spell
-		if(spell_instance && src.mind)
-			src.mind.AddSpell(spell_instance)
+		for(var/spell_path in t2_spell)
+			if(ispath(spell_path))
+				var/obj/effect/proc_holder/spell/spell_instance = new spell_path
+				if(spell_instance && src.mind)
+					src.mind.AddSpell(spell_instance)
 	return
 
 /mob/living/simple_animal/pet/familiar/proc/debug_force_tierup()
@@ -261,12 +265,12 @@
 	var/brewing = 0
 	var/should_brew = FALSE
 	pass_flags = PASSTABLE | PASSMOB
-	inherent_spell = list(
-		/datum/action/cooldown/spell/projectile/lesser_fetch/fae,
-		/datum/action/cooldown/spell/fae_empty)
+	inherent_spell = list(/datum/action/cooldown/spell/projectile/lesser_fetch/fae,)
 	movement_type = FLYING
-	t1_spell = /obj/effect/proc_holder/spell/invoked/reagent_bite
-	t2_spell = /datum/action/cooldown/spell/fae_brew
+	t1_spell = list(
+		/obj/effect/proc_holder/spell/invoked/reagent_bite,
+		/datum/action/cooldown/spell/fae_empty)
+	t2_spell = list(/datum/action/cooldown/spell/fae_brew)
 	tutorial_message = span_notice("As a native of the faewyld, you are able to fly, and kneestingers will not harm you. In addition, you can lash out with a vine to retrieve small objects at a distance.")
 	tierup_messages = list(
 		span_info("You can now act as a reagent container, holding up to 90 drams of any solution. You can also deliver 5 drams at a time of your stored solution with an alchemical bite."),
@@ -456,8 +460,8 @@
 		span_info("As your flame grows, you can manifest it more violently, surging around you to burn anything unfortunate enough to be nearby.")
 	)
 	inherent_spell = list(/obj/effect/proc_holder/spell/invoked/incendiary_bite)
-	t1_spell = /datum/action/cooldown/spell/matthios/raze/infernal
-	t2_spell = /obj/effect/proc_holder/spell/self/infernal_surge
+	t1_spell = list(/obj/effect/proc_holder/spell/invoked/matthios_firebreath/infernal)
+	t2_spell = list(/obj/effect/proc_holder/spell/self/infernal_surge)
 	var/healing_range = 1
 	var/static/list/acceptable_beds = list(/obj/structure/bed, /obj/structure/flora/roguetree/stump, /obj/item/bedsheet)
 	valid_healing_items = list(/obj/item/magic/infernal)
@@ -574,8 +578,8 @@
 	health = WOLF_HEALTH_UNDEAD
 	speak_emote = list ("rumbles", "grinds")
 	inherent_spell = list(/datum/action/cooldown/spell/magicians_stone/elemental) 
-	t1_spell = /datum/action/cooldown/spell/arcyne_forge/elemental
-	t2_spell = /datum/action/cooldown/spell/arcyne_forge/elementalt2
+	t1_spell = list(/datum/action/cooldown/spell/arcyne_forge/elemental)
+	t2_spell = list(/datum/action/cooldown/spell/arcyne_forge/elementalt2)
 	valid_healing_items = list(/obj/item/magic/elemental)
 	tierup_messages = list(
 		span_info("You can now shape your earthen form into tools and weapons, including those capable of repairing equipment."),
